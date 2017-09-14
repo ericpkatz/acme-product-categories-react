@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import ProductForm from './ProductForm';
+import ProductList from './ProductList';
 import Summary from './Summary';
 
 
@@ -60,19 +61,7 @@ class App extends Component{
         
         <div className='row'>
           <div className='col-sm-6'>
-        {
-          products.map( product => {
-            return (
-              <div className='col-sm-4' key={ product.id }>
-                <div className='panel panel-default'>
-                  <div className='panel-body'>
-                    <ProductForm onSave={ onSave } categoryOptions={ categoryOptions } product={ product } onDelete={ onDelete }/>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        }
+            <ProductList onSave={ onSave } categoryOptions={ categoryOptions } products={ products } onDelete={ onDelete }/>
           </div>
           <div className='col-sm-3'>
             <div className='panel panel-default'>
