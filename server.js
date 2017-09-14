@@ -13,11 +13,22 @@ const Product = conn.define('product', {
   },
   price: {
     type: conn.Sequelize.FLOAT,
-    defaultValue: 0
+    defaultValue: 0,
+    validate: {
+      min: 0
+    }
   },
   inStock: {
     type: conn.Sequelize.BOOLEAN,
     defaultValue: true
+  }
+}, {
+  hooks: {
+    beforeValidate: function(product){
+      if(product.categoryId === ''){
+        product.categoryId = null;
+      }
+    }
   }
 });
 
@@ -38,6 +49,7 @@ conn.sync({ force: true })
       Product.create({ name: 'bazz', inStock: false }),
       Category.create({ name: 'Foo Category' }),
       Category.create({ name: 'Bar Category' }),
+      Category.create({ name: 'Bazz Category' })
     ])
     .then(([foo, foo2, bar,  bazz, fooCategory, barCategory])=> {
       return Promise.all([
@@ -89,7 +101,16 @@ app.post('/api/products/', (req, res, next)=>{
     .catch(next);
 });
 
+app.delete('/api/products/:id', (req, res, next)=>{
+  Product.destroy({ where: { id: req.params.id }})
+    .then(()=> res.sendStatus(204))
+    .catch(next);
+});
 
+app.use((err, req, res, next)=> {
+  res.status(err.status || 500).send(err);
+
+});
 
 
 app.listen(process.env.PORT || 3000);

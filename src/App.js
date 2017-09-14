@@ -7,13 +7,24 @@ import Summary from './Summary';
 class App extends Component{
   constructor(){
     super();
-    this.state = { products: [] };
+    this.state = { products: [], categories: [], categoryOptions: [] };
     this.onSave = this.onSave.bind(this);
+    this.onDelete = this.onDelete.bind(this);
     this.loadProducts = this.loadProducts.bind(this);
   }
-  onSave(product){
-    return axios.put(`/api/products/${product.id}`, product)
+  onDelete(product){
+    return axios.delete(`/api/products/${product.id}`)
       .then(()=> this.loadProducts());
+  }
+  onSave(product){
+    if(product.id){
+      return axios.put(`/api/products/${product.id}`, product)
+        .then(()=> this.loadProducts());
+    }
+    else {
+      return axios.post('/api/products/', product)
+        .then(()=> this.loadProducts());
+    }
   }
   loadProducts(){
     Promise.all([
@@ -21,27 +32,41 @@ class App extends Component{
       axios.get('/api/products')
     ])
     .then( results => results.map( result => result.data))
-    .then( ([ categories, products]) => this.setState({ categories, products }));
+    .then(([categories, products])=> {
+      const emptyCategory = {
+        text: '-- none --',
+        value: ''
+      };
+      let categoryOptions = categories.map( category => (
+        {
+          value: category.id,
+          text: category.name
+
+        }
+      ));
+      categoryOptions = [ emptyCategory, ...categoryOptions ];
+      this.setState({ products, categories, categoryOptions  })
+    });
   }
   componentDidMount(){
     this.loadProducts();
   }
-
   render(){
-    const { products, categories } = this.state;
-    const { onSave } = this;
+    const { products, categories, categoryOptions } = this.state;
+    const { onSave, onDelete } = this;
     return (
       <div className='container'>
         <h1>Acme Product/Categories React</h1>
+        
         <div className='row'>
-          <div className='col-sm-8'>
+          <div className='col-sm-6'>
         {
           products.map( product => {
             return (
               <div className='col-sm-4' key={ product.id }>
                 <div className='panel panel-default'>
                   <div className='panel-body'>
-                    <ProductForm onSave={ onSave } categories={ categories } product={ product } />
+                    <ProductForm onSave={ onSave } categoryOptions={ categoryOptions } product={ product } onDelete={ onDelete }/>
                   </div>
                 </div>
               </div>
@@ -49,8 +74,23 @@ class App extends Component{
           })
         }
           </div>
-          <div className='col-sm-4'>
-            <Summary products={ products }/>
+          <div className='col-sm-3'>
+            <div className='panel panel-default'>
+              <div className='panel-heading'>
+                Add a Product
+              </div>
+              <div className='panel-body'>
+                <ProductForm onSave={ onSave } categoryOptions={ categoryOptions } />
+              </div>
+            </div>
+            <div className='panel panel-default'>
+              <div className='panel-heading'>
+                Add a Category
+              </div>
+            </div>
+          </div>
+          <div className='col-sm-3'>
+            <Summary products={ products } categories = { categories }/>
           </div>
         </div>
       </div>

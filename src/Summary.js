@@ -1,14 +1,13 @@
 import React from 'react';
 
-const Summary = ({ products} )=> {
-  const categoryMap = products.reduce((memo, product) => {
-    if(product.category){
-      memo[product.category.name] = memo[product.category.name] || [];
-      memo[product.category.name].push(product);
-    }
-    return memo;
-  }, {});
+const Summary = ({ products, categories} )=> {
   const productsWithoutACategory = products.filter( product => !product.categoryId );
+  const productsOutOfStock = products.filter( product => !product.inStock );
+  const mostExpensiveProduct = products.reduce((memo, product)=> {
+    if(product.price >= memo.price)
+      memo = product;
+    return memo;
+  }, { price: 0});
   return (
     <div className='panel panel-default'>
       <div className='panel-heading'>
@@ -23,10 +22,10 @@ const Summary = ({ products} )=> {
             Categories:
             <ul>
               {
-                Object.keys(categoryMap).map( key => {
+                categories.map( category => {
                   return (
-                    <li key={ key}>
-                      { key } has <strong>{ categoryMap[key].length }</strong> Products
+                    <li key={ category.id}>
+                      { category.name } has <strong>{ category.products.length }</strong> Products
                     </li>
                   )
                 })
@@ -36,8 +35,13 @@ const Summary = ({ products} )=> {
               </li>
             </ul>
           </li>
-          <li className='list-group-item'>Most Expensive</li>
-          <li className='list-group-item'>Products not in stock</li>
+          {
+            mostExpensiveProduct.id &&
+            <li className='list-group-item'>Most Expensive product is <strong>{ mostExpensiveProduct.name}</strong> at { mostExpensiveProduct.price }</li>
+          }
+          <li className='list-group-item'>Products not in stock are {
+            productsOutOfStock.map(product => <span style={ {paddingRight: '10px'}} key={ product.id }>{ product.name }</span>)
+          }</li>
         </ul>
       </div>
     </div>

@@ -1,26 +1,15 @@
 import React, { Component } from 'react';
 
 export default class ProductForm extends Component{
-  constructor({ product, categories, onSave }){
+  constructor({ product, onSave }){
     super();
     this.state = {
-      product: product || {},
-      dirty: false
+      product: product || { price: 0, name: '', inStock: true  },
+      dirty: !product ? true : false
     };
     this.onChange = this.onChange.bind(this);
     this.onSave = this.onSave.bind(this);
-    const emptyCategory = {
-      text: '-- none --',
-      value: ''
-    };
-    this.categoryOptions = categories.map( category => (
-      {
-        value: category.id,
-        text: category.name
-
-      }
-    ));
-    this.categoryOptions = [ emptyCategory, ...this.categoryOptions ];
+    this.onDelete = this.onDelete.bind(this);
   }
   onChange(ev){
     const change = {};
@@ -28,21 +17,45 @@ export default class ProductForm extends Component{
     const product = Object.assign(this.state.product, change);
     this.setState({ product, dirty: true });
   }
+  onDelete(ev){
+    ev.preventDefault();
+    this.props.onDelete(this.state.product);
+  }
   onSave(ev){
     ev.preventDefault();
     this.props.onSave(this.state.product)
-      .then(()=> this.setState( { dirty: false, error: null }))
-      .catch( ex => this.setState({ error: ex }));
+      .then(()=> {
+        const state = { dirty: false, error: null };
+        if(!this.state.product.id){
+          state.product = {
+            name: '',
+            inStock: true,
+            price: 0
+          };
+          state.dirty = true;
+
+        }
+        this.setState( state )
+      })
+      .catch( ex => {
+        let error = ex;
+        try{
+          error = ex.response.data.errors[0].message;
+        }
+        catch(ex){
+        }
+        this.setState({ error });
+      });
   }
   render(){
+    const { categoryOptions } = this.props;
     const { product, dirty, error } = this.state;
-    const { categoryOptions, onChange, onSave } = this;
+    const { onChange, onSave, onDelete } = this;
     return (
       <form>
         {
           error && <div className='alert alert-danger'>{ error.toString() }</div>
         }
-
         <div className='form-group'>
           <label>Name</label>
           <input name='name' onChange={ onChange } className='form-control' value={ product.name } />
@@ -66,7 +79,11 @@ export default class ProductForm extends Component{
           </select>
         </div>
         <div className='form-group'>
-          <button disabled={ !dirty } className='btn btn-primary' onClick={ onSave }>Save</button>
+          <button disabled={ !dirty } className='btn btn-primary btn-block' onClick={ onSave }>Save</button>
+        { 
+          product.id && 
+          <button className='btn btn-danger btn-block' onClick={ onDelete }>Delete</button>
+        }
         </div>
       </form>
     );
