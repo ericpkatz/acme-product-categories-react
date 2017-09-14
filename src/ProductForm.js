@@ -30,13 +30,19 @@ export default class ProductForm extends Component{
   }
   onSave(ev){
     ev.preventDefault();
-    this.props.onSave(this.state.product);
+    this.props.onSave(this.state.product)
+      .then(()=> this.setState( { dirty: false, error: null }))
+      .catch( ex => this.setState({ error: ex }));
   }
   render(){
-    const { product, dirty } = this.state;
+    const { product, dirty, error } = this.state;
     const { categoryOptions, onChange, onSave } = this;
     return (
       <form>
+        {
+          error && <div className='alert alert-danger'>{ error.toString() }</div>
+        }
+
         <div className='form-group'>
           <label>Name</label>
           <input name='name' onChange={ onChange } className='form-control' value={ product.name } />
