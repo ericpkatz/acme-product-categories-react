@@ -72,11 +72,6 @@ class App extends Component{
                 <ProductForm onSave={ onSave } categoryOptions={ categoryOptions } />
               </div>
             </div>
-            <div className='panel panel-default'>
-              <div className='panel-heading'>
-                Add a Category
-              </div>
-            </div>
           </div>
           <div className='col-sm-3'>
             <Summary products={ products } categories = { categories }/>
