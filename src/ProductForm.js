@@ -4,7 +4,7 @@ export default class ProductForm extends Component{
   constructor({ product, onSave }){
     super();
     this.state = {
-      product: product || { price: 0, name: '', inStock: true  },
+      product: product || { price: 0, name: '', inStock: true, random: '0'  },
       dirty: !product ? true : false
     };
     this.onChange = this.onChange.bind(this);
@@ -30,7 +30,8 @@ export default class ProductForm extends Component{
           state.product = {
             name: '',
             inStock: true,
-            price: 0
+            price: 0,
+            random: '0'
           };
           state.dirty = true;
 
