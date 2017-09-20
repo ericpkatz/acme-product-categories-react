@@ -47,6 +47,11 @@ export default class ProductForm extends Component{
         this.setState({ error });
       });
   }
+  componentWillReceiveProps(nextProps){
+    if(nextProps.product){
+      this.setState({ product: nextProps.product });
+    }
+  }
   render(){
     const { categoryOptions } = this.props;
     const { product, dirty, error } = this.state;
@@ -57,7 +62,7 @@ export default class ProductForm extends Component{
           error && <div className='alert alert-danger'>{ error.toString() }</div>
         }
         <div className='form-group'>
-          <label>Name</label>
+          <label>Name ({ product.random })</label>
           <input name='name' onChange={ onChange } className='form-control' value={ product.name } />
         </div>
         <div className='form-group'>

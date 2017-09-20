@@ -11,6 +11,9 @@ const Product = conn.define('product', {
     type: conn.Sequelize.STRING,
     unique: true
   },
+  random: {
+    type: conn.Sequelize.STRING,
+  },
   price: {
     type: conn.Sequelize.FLOAT,
     defaultValue: 0,
@@ -24,6 +27,12 @@ const Product = conn.define('product', {
   }
 }, {
   hooks: {
+    beforeCreate: (product)=> {
+      product.random = Math.floor(Math.random() * 1000);
+    },
+    beforeUpdate: (product)=> {
+      product.random = Math.floor(Math.random() * 1000);
+    },
     beforeValidate: function(product){
       if(product.categoryId === ''){
         product.categoryId = null;
